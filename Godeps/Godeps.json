@@ -1,0 +1,52 @@
+{
+	"ImportPath": "github.com/sclasen/go-metrics-cloudwatch",
+	"GoVersion": "go1.4",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/aws",
+			"Comment": "v0.6.7-20-gab85612",
+			"Rev": "ab85612d91c52e8f560e57d9ebdcf9682eaa24c7"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/endpoints",
+			"Comment": "v0.6.7-20-gab85612",
+			"Rev": "ab85612d91c52e8f560e57d9ebdcf9682eaa24c7"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/query",
+			"Comment": "v0.6.7-20-gab85612",
+			"Rev": "ab85612d91c52e8f560e57d9ebdcf9682eaa24c7"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/rest",
+			"Comment": "v0.6.7-20-gab85612",
+			"Rev": "ab85612d91c52e8f560e57d9ebdcf9682eaa24c7"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/xml/xmlutil",
+			"Comment": "v0.6.7-20-gab85612",
+			"Rev": "ab85612d91c52e8f560e57d9ebdcf9682eaa24c7"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/signer/v4",
+			"Comment": "v0.6.7-20-gab85612",
+			"Rev": "ab85612d91c52e8f560e57d9ebdcf9682eaa24c7"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/service/cloudwatch",
+			"Comment": "v0.6.7-20-gab85612",
+			"Rev": "ab85612d91c52e8f560e57d9ebdcf9682eaa24c7"
+		},
+		{
+			"ImportPath": "github.com/rcrowley/go-metrics",
+			"Rev": "dee209f2455f101a5e4e593dea94872d2c62d85d"
+		},
+		{
+			"ImportPath": "github.com/vaughan0/go-ini",
+			"Rev": "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1"
+		}
+	]
+}
