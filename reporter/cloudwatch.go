@@ -14,9 +14,11 @@ import (
 func Cloudwatch(registry metrics.Registry, cfg *config.Config) {
 	ticks := time.NewTicker(cfg.ReportingInterval)
 	defer ticks.Stop()
-	select {
-	case <-ticks.C:
-		emitMetrics(registry, cfg)
+	for {
+		select {
+		case <-ticks.C:
+			emitMetrics(registry, cfg)
+		}
 	}
 }
 
