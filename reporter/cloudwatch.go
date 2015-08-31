@@ -85,7 +85,9 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 			data = append(data, datum)
 		case metrics.Histogram:
 			h := metric.Snapshot()
-
+			if h.Count() == 0 {
+				return
+			}
 			datum := aDatum(name)
 			datum.StatisticValues = &cloudwatch.StatisticSet{
 				Maximum:     aws.Float64(float64(h.Max())),
@@ -116,7 +118,9 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 			}
 		case metrics.Timer:
 			t := metric.Snapshot()
-
+			if t.Count() == 0 {
+				return
+			}
 			dataz := map[string]float64{
 				fmt.Sprintf("%s.count", name):          float64(t.Count()),
 				fmt.Sprintf("%s.one-minute", name):     t.Rate1(),
