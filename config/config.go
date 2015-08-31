@@ -27,8 +27,8 @@ type Config struct {
 }
 
 type Filter interface {
-	ShouldReport(string) bool
-	Percentiles(string) []float64
+	ShouldReport(metric string) bool
+	Percentiles(metric string) []float64
 }
 
 type NoFilter struct{}
