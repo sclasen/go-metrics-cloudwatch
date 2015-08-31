@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"log"
 	"time"
