@@ -25,9 +25,9 @@ func emitMetrics(registry metrics.Registry, cfg *config.Config) {
 
 	//20 is the max metrics per request
 	for len(data) > 20 {
-		put := data[0:19]
+		put := data[0:20]
 		putMetrics(cfg, put)
-		data = data[19:]
+		data = data[20:]
 	}
 
 	putMetrics(cfg, data)
