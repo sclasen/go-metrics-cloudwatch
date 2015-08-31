@@ -2,12 +2,13 @@ package reporter
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/rcrowley/go-metrics"
 	"github.com/sclasen/go-metrics-cloudwatch/config"
-	"log"
-	"time"
 )
 
 //blocks, run as go reporter.Cloudwatch(cfg)

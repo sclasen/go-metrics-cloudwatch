@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+
 	"github.com/rcrowley/go-metrics"
 	// "github.com/rcrowley/go-metrics/stathat"
 	"log"

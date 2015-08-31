@@ -1,9 +1,10 @@
 package config
 
 import (
-	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"log"
 	"time"
+
+	"github.com/aws/aws-sdk-go/service/cloudwatch"
 )
 
 const (
