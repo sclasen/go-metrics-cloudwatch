@@ -97,7 +97,7 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 				SampleCount: aws.Float64(float64(h.Count())),
 				Sum:         aws.Float64(float64(h.Sum())),
 			}
-			data := append(data, datum)
+			data = append(data, datum)
 
 			for _, p := range cfg.Filter.Percentiles(name) {
 				datum := aDatum(fmt.Sprintf("%s-perc%.3f", name, p))
