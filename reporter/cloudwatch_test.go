@@ -2,9 +2,9 @@ package reporter
 
 import (
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
+	"github.com/rcrowley/go-metrics"
 	"github.com/sclasen/go-metrics-cloudwatch/config"
 	"testing"
-	"github.com/rcrowley/go-metrics"
 )
 
 type MockPutMetricsClient struct {
@@ -18,11 +18,9 @@ func (m *MockPutMetricsClient) PutMetricData(in *cloudwatch.PutMetricDataInput) 
 
 func TestCloudwatchReporter(t *testing.T) {
 	mock := &MockPutMetricsClient{}
-	cfg := &config.StaticConfig{
-		Cloudwatch:  mock,
-		Percs:       []float64{config.Perc100, config.Perc99},
-		CWNamespace: "test",
-		Filter:      func(_ string) bool { return true },
+	cfg := &config.Config{
+		Client: mock,
+		Filter: &config.NoFilter{},
 	}
 	registry := metrics.DefaultRegistry
 	count := metrics.GetOrRegisterCounter("count", registry)

@@ -11,8 +11,8 @@ import (
 )
 
 //blocks, run as go reporter.Cloudwatch(cfg)
-func Cloudwatch(registry metrics.Registry, cfg config.Config) {
-	ticks := time.NewTicker(cfg.ReportingInterval())
+func Cloudwatch(registry metrics.Registry, cfg *config.Config) {
+	ticks := time.NewTicker(cfg.ReportingInterval)
 	defer ticks.Stop()
 	select {
 	case <-ticks.C:
@@ -20,10 +20,10 @@ func Cloudwatch(registry metrics.Registry, cfg config.Config) {
 	}
 }
 
-func emitMetrics(registry metrics.Registry, cfg config.Config) {
-	client := cfg.Client()
+func emitMetrics(registry metrics.Registry, cfg *config.Config) {
+	client := cfg.Client
 	req := &cloudwatch.PutMetricDataInput{
-		Namespace:  aws.String(cfg.Namespace()),
+		Namespace:  aws.String(cfg.Namespace),
 		MetricData: metricsDatum(registry, cfg),
 	}
 	_, err := client.PutMetricData(req)
@@ -34,7 +34,7 @@ func emitMetrics(registry metrics.Registry, cfg config.Config) {
 	}
 }
 
-func metricsDatum(registry metrics.Registry, cfg config.Config) []*cloudwatch.MetricDatum {
+func metricsDatum(registry metrics.Registry, cfg *config.Config) []*cloudwatch.MetricDatum {
 
 	data := []*cloudwatch.MetricDatum{}
 	timestamp := aws.Time(time.Now())
@@ -47,7 +47,7 @@ func metricsDatum(registry metrics.Registry, cfg config.Config) []*cloudwatch.Me
 	//rough port from the graphite reporter
 	registry.Each(func(name string, i interface{}) {
 
-		if !cfg.ShouldReport(name) {
+		if !cfg.Filter.ShouldReport(name) {
 			return
 		}
 
@@ -71,7 +71,7 @@ func metricsDatum(registry metrics.Registry, cfg config.Config) []*cloudwatch.Me
 			data = append(data, datum)
 		case metrics.Histogram:
 			h := metric.Snapshot()
-			for _, p := range cfg.Percentiles() {
+			for _, p := range cfg.Filter.Percentiles(name) {
 				datum := aDatum(fmt.Sprintf("%s-perc%.3f", name, p))
 				datum.StatisticValues = &cloudwatch.StatisticSet{
 					Maximum:     aws.Float64(float64(h.Max())),
@@ -111,7 +111,7 @@ func metricsDatum(registry metrics.Registry, cfg config.Config) []*cloudwatch.Me
 				data = append(data, datum)
 			}
 
-			for _, p := range cfg.Percentiles() {
+			for _, p := range cfg.Filter.Percentiles(name) {
 				datum := aDatum(fmt.Sprintf("%s-perc%.3f", name, p))
 				datum.StatisticValues = &cloudwatch.StatisticSet{
 					Maximum:     aws.Float64(float64(t.Max())),

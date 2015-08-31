@@ -19,46 +19,31 @@ type PutMetricsClient interface {
 	PutMetricData(*cloudwatch.PutMetricDataInput) (*cloudwatch.PutMetricDataOutput, error)
 }
 
-type Config interface {
-	Namespace() string
-	ShouldReport(metricName string) bool
-	ReportingInterval() time.Duration
-	Percentiles() []float64
-	Client() PutMetricsClient
+type Config struct {
+	Filter            Filter
+	Client            PutMetricsClient
+	ReportingInterval time.Duration
+	Namespace         string
 }
 
-type StaticConfig struct {
-	Cloudwatch  PutMetricsClient
-	Interval    time.Duration
-	Percs       []float64
-	CWNamespace string
-	Filter      func(string) bool
+type Filter interface {
+	ShouldReport(string) bool
+	Percentiles(string) []float64
 }
 
-func (s *StaticConfig) ShouldReport(metricName string) bool {
-	should := s.Filter(metricName)
-	log.Printf("at=should-report metric=%s report=%t", metricName, should)
-	return should
+type NoFilter struct{}
+
+func (n *NoFilter) ShouldReport(metric string) bool {
+	log.Printf("at=should-report metric=%s ", metric)
+	return true
 }
 
-func (s *StaticConfig) ReportingInterval() time.Duration {
-	return s.Interval
-}
-
-func (s *StaticConfig) Client() PutMetricsClient {
-	return s.Cloudwatch
-}
-
-func (s *StaticConfig) Percentiles() []float64 {
-	return s.Percs
-}
-
-func (s *StaticConfig) Namespace() string {
-	return s.CWNamespace
+func (n *NoFilter) Percentiles(metric string) []float64 {
+	return []float64{Perc50, Perc75, Perc95, Perc99, Perc999, Perc100}
 }
 
 /*
-type DynamoDBConfig struct {
+type DynamoDBFilter struct {
 	globalEnabledMetrics []string
 	perInstanceEnabledMetrics map[string]string
 }
