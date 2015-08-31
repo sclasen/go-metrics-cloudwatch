@@ -21,10 +21,24 @@ func Cloudwatch(registry metrics.Registry, cfg *config.Config) {
 }
 
 func emitMetrics(registry metrics.Registry, cfg *config.Config) {
+	data := metricsData(registry, cfg)
+
+	//20 is the max metrics per request
+	for len(data) > 20 {
+		put := data[0:19]
+		putMetrics(cfg, put)
+		data = data[19:]
+	}
+
+	putMetrics(cfg, data)
+
+}
+
+func putMetrics(cfg *config.Config, data []*cloudwatch.MetricDatum) {
 	client := cfg.Client
 	req := &cloudwatch.PutMetricDataInput{
 		Namespace:  aws.String(cfg.Namespace),
-		MetricData: metricsDatum(registry, cfg),
+		MetricData: data,
 	}
 	_, err := client.PutMetricData(req)
 	if err != nil {
@@ -34,7 +48,7 @@ func emitMetrics(registry metrics.Registry, cfg *config.Config) {
 	}
 }
 
-func metricsDatum(registry metrics.Registry, cfg *config.Config) []*cloudwatch.MetricDatum {
+func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.MetricDatum {
 
 	data := []*cloudwatch.MetricDatum{}
 	timestamp := aws.Time(time.Now())
