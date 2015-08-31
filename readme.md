@@ -3,6 +3,9 @@ go-metrics-cloudwatch
 
 Reports go-metrics to cloudwatch.
 
+[![Build Status](https://travis-ci.org/sclasen/go-metrics-cloudwawtch.svg?branch=master)](https://travis-ci.org/sclasen/go-metrics-cloudwatch)
+
+
 usage
 =====
 
