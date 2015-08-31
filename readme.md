@@ -13,6 +13,7 @@ usage
 import (
     "github.com/sclasen/go-metrics-cloudwatch/config"
     "github.com/sclasen/go-metrics-cloudwatch/reporter"
+    "github.com/aws/aws-sdk-go/service/cloudwatch"
 )
 
 metricsConf := &config.Config{
