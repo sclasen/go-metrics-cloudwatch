@@ -1,11 +1,11 @@
 package reporter
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/rcrowley/go-metrics"
 	"github.com/sclasen/go-metrics-cloudwatch/config"
 	"testing"
-	"fmt"
 )
 
 type MockPutMetricsClient struct {

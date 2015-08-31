@@ -94,6 +94,7 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 					Sum:         aws.Float64(float64(h.Sum())),
 				}
 				datum.Value = aws.Float64(h.Percentile(p))
+				data = append(data, datum)
 			}
 		case metrics.Meter:
 			m := metric.Snapshot()
@@ -134,6 +135,7 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 					Sum:         aws.Float64(float64(t.Sum())),
 				}
 				datum.Value = aws.Float64(t.Percentile(p))
+				data = append(data, datum)
 			}
 
 		}
