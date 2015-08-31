@@ -58,6 +58,7 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 		return &cloudwatch.MetricDatum{
 			MetricName: aws.String(name),
 			Timestamp:  timestamp,
+			Dimensions: dimensions(cfg),
 		}
 	}
 	//rough port from the graphite reporter
@@ -154,4 +155,17 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 		}
 	})
 	return data
+}
+
+func dimensions(c *config.Config) []*cloudwatch.Dimension {
+	ds := []*cloudwatch.Dimension{}
+	for k, v := range c.StaticDimensions {
+		d := &cloudwatch.Dimension{
+			Name:  aws.String(k),
+			Value: aws.String(v),
+		}
+
+		ds = append(ds, d)
+	}
+	return ds
 }

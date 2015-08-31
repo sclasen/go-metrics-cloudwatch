@@ -39,7 +39,6 @@ func TestCloudwatchReporter(t *testing.T) {
 	}
 }
 
-
 func TestHistograms(t *testing.T) {
 	mock := &MockPutMetricsClient{}
 	cfg := &config.Config{

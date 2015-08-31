@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"log"
 	"time"
@@ -24,6 +25,7 @@ type Config struct {
 	Client            PutMetricsClient
 	ReportingInterval time.Duration
 	Namespace         string
+	StaticDimensions  map[string]string
 }
 
 type Filter interface {
