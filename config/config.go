@@ -44,6 +44,17 @@ func (n *NoFilter) Percentiles(metric string) []float64 {
 	return []float64{Perc50, Perc75, Perc95, Perc99, Perc999, Perc100}
 }
 
+type AllFilter struct{}
+
+func (n *AllFilter) ShouldReport(metric string) bool {
+	log.Printf("at=no-report metric=%s ", metric)
+	return false
+}
+
+func (n *AllFilter) Percentiles(metric string) []float64 {
+	return []float64{}
+}
+
 /*
 type DynamoDBFilter struct {
 	globalEnabledMetrics []string

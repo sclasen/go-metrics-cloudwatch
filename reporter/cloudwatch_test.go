@@ -72,3 +72,19 @@ func TestTimers(t *testing.T) {
 		t.Fatal("No Metrics Put")
 	}
 }
+
+func TestFilters(t *testing.T) {
+	mock := &MockPutMetricsClient{}
+	cfg := &config.Config{
+		Client: mock,
+		Filter: &config.AllFilter{},
+	}
+	registry := metrics.NewRegistry()
+	timer := metrics.GetOrRegisterTimer(fmt.Sprintf("timer"), registry)
+	timer.Update(10 * time.Second)
+	emitMetrics(registry, cfg)
+
+	if mock.metricsPut > 0 {
+		t.Fatal("Metrics Put")
+	}
+}

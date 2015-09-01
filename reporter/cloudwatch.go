@@ -33,7 +33,9 @@ func emitMetrics(registry metrics.Registry, cfg *config.Config) {
 		data = data[20:]
 	}
 
-	putMetrics(cfg, data)
+	if len(data) > 0 {
+		putMetrics(cfg, data)
+	}
 
 }
 
