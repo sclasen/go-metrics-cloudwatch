@@ -94,16 +94,9 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 			if h.Count() == 0 {
 				return
 			}
-			datum := aDatum(name)
-			datum.StatisticValues = &cloudwatch.StatisticSet{
-				Maximum:     aws.Float64(float64(h.Max())),
-				Minimum:     aws.Float64(float64(h.Min())),
-				SampleCount: aws.Float64(float64(h.Count())),
-				Sum:         aws.Float64(float64(h.Sum())),
-			}
-			data = append(data, datum)
-
+			log.Printf("%+v", h)
 			for _, p := range cfg.Filter.Percentiles(name) {
+				log.Printf("%+v", h)
 				datum := aDatum(fmt.Sprintf("%s-perc%.3f", name, p))
 				datum.Value = aws.Float64(h.Percentile(p))
 				data = append(data, datum)
@@ -139,16 +132,6 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 				datum.Value = aws.Float64(v)
 				data = append(data, datum)
 			}
-
-			datum := aDatum(name)
-			datum.StatisticValues = &cloudwatch.StatisticSet{
-				Maximum:     aws.Float64(float64(t.Max())),
-				Minimum:     aws.Float64(float64(t.Min())),
-				SampleCount: aws.Float64(float64(t.Count())),
-				Sum:         aws.Float64(float64(t.Sum())),
-			}
-			data = append(data, datum)
-
 			for _, p := range cfg.Filter.Percentiles(name) {
 				datum := aDatum(fmt.Sprintf("%s-perc%.3f", name, p))
 				datum.Value = aws.Float64(t.Percentile(p))

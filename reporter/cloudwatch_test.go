@@ -42,9 +42,10 @@ func TestCloudwatchReporter(t *testing.T) {
 
 func TestHistograms(t *testing.T) {
 	mock := &MockPutMetricsClient{}
+	filter := &config.NoFilter{}
 	cfg := &config.Config{
 		Client: mock,
-		Filter: &config.NoFilter{},
+		Filter: filter,
 	}
 	registry := metrics.NewRegistry()
 	hist := metrics.GetOrRegisterHistogram(fmt.Sprintf("histo"), registry, metrics.NewUniformSample(1024))
@@ -52,7 +53,7 @@ func TestHistograms(t *testing.T) {
 	hist.Update(500)
 	emitMetrics(registry, cfg)
 
-	if mock.metricsPut < 7 {
+	if mock.metricsPut < len(filter.Percentiles("")) {
 		t.Fatal("No Metrics Put")
 	}
 }
