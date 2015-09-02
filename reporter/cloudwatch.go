@@ -79,6 +79,9 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 			if metric.Count() > 0 {
 				data = append(data, datum)
 			}
+			if cfg.ResetCountersOnReport {
+				metric.Clear()
+			}
 		case metrics.Gauge:
 			datum := aDatum(name)
 			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
