@@ -67,42 +67,48 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 	//rough port from the graphite reporter
 	registry.Each(func(name string, i interface{}) {
 
-		if !cfg.Filter.ShouldReport(name) {
-			return
-		}
-
 		switch metric := i.(type) {
 		case metrics.Counter:
-			datum := aDatum(name)
-			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
-			datum.Value = aws.Float64(float64(metric.Count()))
-			if metric.Count() > 0 {
+			count := float64(metric.Count())
+			if cfg.Filter.ShouldReport(name, count) {
+				datum := aDatum(name)
+				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
+				datum.Value = aws.Float64(count)
 				data = append(data, datum)
 			}
 			if cfg.ResetCountersOnReport {
 				metric.Clear()
 			}
 		case metrics.Gauge:
-			datum := aDatum(name)
-			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
-			datum.Value = aws.Float64(float64(metric.Value()))
-			data = append(data, datum)
+			value := float64(metric.Value())
+			if cfg.Filter.ShouldReport(name, value) {
+				datum := aDatum(name)
+				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
+				datum.Value = aws.Float64(float64(value))
+				data = append(data, datum)
+			}
 		case metrics.GaugeFloat64:
-			datum := aDatum(name)
-			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
-			datum.Value = aws.Float64(float64(metric.Value()))
-			data = append(data, datum)
+			value := float64(metric.Value())
+			if cfg.Filter.ShouldReport(name, value) {
+				datum := aDatum(name)
+				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
+				datum.Value = aws.Float64(value)
+				data = append(data, datum)
+			}
 		case metrics.Histogram:
 			h := metric.Snapshot()
-			if h.Count() == 0 {
-				return
-			}
-			log.Printf("%+v", h)
-			for _, p := range cfg.Filter.Percentiles(name) {
-				log.Printf("%+v", h)
-				datum := aDatum(fmt.Sprintf("%s-perc%.3f", name, p))
-				datum.Value = aws.Float64(h.Percentile(p))
-				data = append(data, datum)
+			value := float64(h.Count())
+			if cfg.Filter.ShouldReport(name, value) {
+				for _, p := range cfg.Filter.Percentiles(name) {
+					log.Printf("%+v", h)
+					pname := fmt.Sprintf("%s-perc%.3f", name, p)
+					pvalue := h.Percentile(p)
+					if cfg.Filter.ShouldReport(pname, pvalue) {
+						datum := aDatum(pname)
+						datum.Value = aws.Float64(pvalue)
+						data = append(data, datum)
+					}
+				}
 			}
 		case metrics.Meter:
 			m := metric.Snapshot()
@@ -114,9 +120,11 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 				fmt.Sprintf("%s.mean", name):           m.RateMean(),
 			}
 			for n, v := range dataz {
-				datum := aDatum(n)
-				datum.Value = aws.Float64(v)
-				data = append(data, datum)
+				if cfg.Filter.ShouldReport(n, v) {
+					datum := aDatum(n)
+					datum.Value = aws.Float64(v)
+					data = append(data, datum)
+				}
 			}
 		case metrics.Timer:
 			t := metric.Snapshot()
@@ -131,14 +139,20 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 				fmt.Sprintf("%s.mean", name):           t.RateMean(),
 			}
 			for n, v := range dataz {
-				datum := aDatum(n)
-				datum.Value = aws.Float64(v)
-				data = append(data, datum)
+				if cfg.Filter.ShouldReport(n, v) {
+					datum := aDatum(n)
+					datum.Value = aws.Float64(v)
+					data = append(data, datum)
+				}
 			}
 			for _, p := range cfg.Filter.Percentiles(name) {
-				datum := aDatum(fmt.Sprintf("%s-perc%.3f", name, p))
-				datum.Value = aws.Float64(t.Percentile(p))
-				data = append(data, datum)
+				pname := fmt.Sprintf("%s-perc%.3f", name, p)
+				pvalue := t.Percentile(p)
+				if cfg.Filter.ShouldReport(pname, pvalue) {
+					datum := aDatum(pname)
+					datum.Value = aws.Float64(pvalue)
+					data = append(data, datum)
+				}
 			}
 
 		}
