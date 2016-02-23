@@ -105,6 +105,7 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 					pvalue := h.Percentile(p)
 					if cfg.Filter.ShouldReport(pname, pvalue) {
 						datum := aDatum(pname)
+						datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 						datum.Value = aws.Float64(pvalue)
 						data = append(data, datum)
 					}
