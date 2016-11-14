@@ -78,7 +78,7 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 				datum.Value = aws.Float64(count)
 				data = append(data, datum)
-				countersOut +=1
+				countersOut += 1
 			}
 			if cfg.ResetCountersOnReport {
 				metric.Clear()
@@ -117,7 +117,7 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 						datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 						datum.Value = aws.Float64(pvalue)
 						data = append(data, datum)
-						histosOut +=1
+						histosOut += 1
 					}
 				}
 			}
@@ -136,7 +136,7 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 					datum := aDatum(n)
 					datum.Value = aws.Float64(v)
 					data = append(data, datum)
-					metersOut +=1
+					metersOut += 1
 				}
 			}
 		case metrics.Timer:
@@ -167,13 +167,13 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 					datum := aDatum(pname)
 					datum.Value = aws.Float64(pvalue)
 					data = append(data, datum)
-					timersOut +=1
+					timersOut += 1
 				}
 			}
 
 		}
 	})
-        total := counters + gagues + histos + meters + timers
+	total := counters + gagues + histos + meters + timers
 	totalOut := countersOut + gaguesOut + histosOut + metersOut + timersOut
 	log.Printf("component=cloudwatch-reporter fn=metricsData at=sources total=%d counters=%d gagues=%d histos=%d meters=%d timers=%d", total, counters, gagues, histos, meters, timers)
 	log.Printf("component=cloudwatch-reporter fn=metricsData at=targets total=%d counters=%d gagues=%d histos=%d meters=%d timers=%d", totalOut, countersOut, gaguesOut, histosOut, metersOut, timersOut)
