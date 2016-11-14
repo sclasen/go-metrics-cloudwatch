@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
-	"github.com/rcrowley/go-metrics"
+	metrics "github.com/rcrowley/go-metrics"
 	"github.com/sclasen/go-metrics-cloudwatch/config"
 )
 
@@ -54,9 +54,12 @@ func putMetrics(cfg *config.Config, data []*cloudwatch.MetricDatum) {
 }
 
 func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.MetricDatum {
+	counters, gagues, histos, meters, timers := 0, 0, 0, 0, 0
+	countersOut, gaguesOut, histosOut, metersOut, timersOut := 0, 0, 0, 0, 0
 
 	data := []*cloudwatch.MetricDatum{}
 	timestamp := aws.Time(time.Now())
+
 	aDatum := func(name string) *cloudwatch.MetricDatum {
 		return &cloudwatch.MetricDatum{
 			MetricName: aws.String(name),
@@ -66,36 +69,42 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 	}
 	//rough port from the graphite reporter
 	registry.Each(func(name string, i interface{}) {
-
 		switch metric := i.(type) {
 		case metrics.Counter:
+			counters += 1
 			count := float64(metric.Count())
 			if cfg.Filter.ShouldReport(name, count) {
 				datum := aDatum(name)
 				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 				datum.Value = aws.Float64(count)
 				data = append(data, datum)
+				countersOut += 1
 			}
 			if cfg.ResetCountersOnReport {
 				metric.Clear()
 			}
 		case metrics.Gauge:
+			gagues += 1
 			value := float64(metric.Value())
 			if cfg.Filter.ShouldReport(name, value) {
 				datum := aDatum(name)
 				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 				datum.Value = aws.Float64(float64(value))
 				data = append(data, datum)
+				gaguesOut += 1
 			}
 		case metrics.GaugeFloat64:
+			gagues += 1
 			value := float64(metric.Value())
 			if cfg.Filter.ShouldReport(name, value) {
 				datum := aDatum(name)
 				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 				datum.Value = aws.Float64(value)
 				data = append(data, datum)
+				gaguesOut += 1
 			}
 		case metrics.Histogram:
+			histos += 1
 			h := metric.Snapshot()
 			value := float64(h.Count())
 			if cfg.Filter.ShouldReport(name, value) {
@@ -108,10 +117,12 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 						datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 						datum.Value = aws.Float64(pvalue)
 						data = append(data, datum)
+						histosOut += 1
 					}
 				}
 			}
 		case metrics.Meter:
+			meters += 1
 			m := metric.Snapshot()
 			dataz := map[string]float64{
 				fmt.Sprintf("%s.count", name):          float64(m.Count()),
@@ -125,9 +136,11 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 					datum := aDatum(n)
 					datum.Value = aws.Float64(v)
 					data = append(data, datum)
+					metersOut += 1
 				}
 			}
 		case metrics.Timer:
+			timers += 1
 			t := metric.Snapshot()
 			if t.Count() == 0 {
 				return
@@ -144,6 +157,7 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 					datum := aDatum(n)
 					datum.Value = aws.Float64(v)
 					data = append(data, datum)
+					timersOut += 1
 				}
 			}
 			for _, p := range cfg.Filter.Percentiles(name) {
@@ -153,11 +167,17 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 					datum := aDatum(pname)
 					datum.Value = aws.Float64(pvalue)
 					data = append(data, datum)
+					timersOut += 1
 				}
 			}
 
 		}
 	})
+	total := counters + gagues + histos + meters + timers
+	totalOut := countersOut + gaguesOut + histosOut + metersOut + timersOut
+	log.Printf("component=cloudwatch-reporter fn=metricsData at=sources total=%d counters=%d gagues=%d histos=%d meters=%d timers=%d", total, counters, gagues, histos, meters, timers)
+	log.Printf("component=cloudwatch-reporter fn=metricsData at=targets total=%d counters=%d gagues=%d histos=%d meters=%d timers=%d", totalOut, countersOut, gaguesOut, histosOut, metersOut, timersOut)
+
 	return data
 }
 
