@@ -109,7 +109,6 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 			value := float64(h.Count())
 			if cfg.Filter.ShouldReport(name, value) {
 				for _, p := range cfg.Filter.Percentiles(name) {
-					log.Printf("%+v", h)
 					pname := fmt.Sprintf("%s-perc%.3f", name, p)
 					pvalue := h.Percentile(p)
 					if cfg.Filter.ShouldReport(pname, pvalue) {
