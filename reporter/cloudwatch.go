@@ -11,6 +11,8 @@ import (
 	"github.com/sclasen/go-metrics-cloudwatch/config"
 )
 
+var Silence = false
+
 //blocks, run as go reporter.Cloudwatch(cfg)
 func Cloudwatch(registry metrics.Registry, cfg *config.Config) {
 	ticks := time.NewTicker(cfg.ReportingInterval)
@@ -47,9 +49,13 @@ func putMetrics(cfg *config.Config, data []*cloudwatch.MetricDatum) {
 	}
 	_, err := client.PutMetricData(req)
 	if err != nil {
-		log.Printf("component=cloudwatch-reporter fn=emitMetrics at=error error=%s", err)
+		if !Silence {
+			log.Printf("component=cloudwatch-reporter fn=emitMetrics at=error error=%s", err)
+		}
 	} else {
-		log.Printf("component=cloudwatch-reporter fn=emitMetrics at=put-metrics count=%d", len(req.MetricData))
+		if !Silence {
+			log.Printf("component=cloudwatch-reporter fn=emitMetrics at=put-metrics count=%d", len(req.MetricData))
+		}
 	}
 }
 
@@ -174,8 +180,10 @@ func metricsData(registry metrics.Registry, cfg *config.Config) []*cloudwatch.Me
 	})
 	total := counters + gagues + histos + meters + timers
 	totalOut := countersOut + gaguesOut + histosOut + metersOut + timersOut
-	log.Printf("component=cloudwatch-reporter fn=metricsData at=sources total=%d counters=%d gagues=%d histos=%d meters=%d timers=%d", total, counters, gagues, histos, meters, timers)
-	log.Printf("component=cloudwatch-reporter fn=metricsData at=targets total=%d counters=%d gagues=%d histos=%d meters=%d timers=%d", totalOut, countersOut, gaguesOut, histosOut, metersOut, timersOut)
+	if !Silence {
+		log.Printf("component=cloudwatch-reporter fn=metricsData at=sources total=%d counters=%d gagues=%d histos=%d meters=%d timers=%d", total, counters, gagues, histos, meters, timers)
+		log.Printf("component=cloudwatch-reporter fn=metricsData at=targets total=%d counters=%d gagues=%d histos=%d meters=%d timers=%d", totalOut, countersOut, gaguesOut, histosOut, metersOut, timersOut)
+	}
 
 	return data
 }
